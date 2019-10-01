@@ -73,3 +73,10 @@ virtualenv venv
 pip install -r requirements.txt
 python server.py
 ```
+
+# Outputs
+You can view the 230 stations defined in Postgres using:
+`kafka-console-consumer --bootstrap-server localhost:9092 --topic "org.chicago.cta.stations" --from-beginning` to get
+the following output.
+
+![230 stations](images/stations.PNG)

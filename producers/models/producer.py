@@ -36,7 +36,9 @@ class Producer:
         self.broker_properties = {
             "broker.id": 0,
             "log.dirs": "/tmp/kafka-logs",
-            "zookeeper.connect": "localhost:2181"
+            "zookeeper.connect": "localhost:2181",
+            "schema.registry.url": "http://localhost:8081",
+            "bootstrap.servers": "PLAINTEXT://localhost:9092"
         }
 
         # If the topic does not already exist, try to create it
@@ -45,9 +47,8 @@ class Producer:
             Producer.existing_topics.add(self.topic_name)
 
         
-        self.producer = AvroProducer({'bootstrap.servers':'PLAINTEXT://localhost:9092,\
-                                      PLAINTEXT://localhost:9093,PLAINTEXT://localhost:9094', 
-                                      'schema.registry.url':'http://localhost:8081'},
+        self.producer = AvroProducer({'bootstrap.servers': self.broker_properties["bootstrap.servers"], 
+                                      'schema.registry.url': self.broker_properties["schema.registry.url"]},
         default_key_schema=self.key_schema, default_value_schema=self.value_schema
         )
 
@@ -60,8 +61,7 @@ class Producer:
         #
         #
         
-        client = AdminClient({'bootstrap.servers': 'PLAINTEXT://localhost:9092,\
-                                      PLAINTEXT://localhost:9093,PLAINTEXT://localhost:9094'})
+        client = AdminClient({'bootstrap.servers': self.broker_properties["bootstrap.servers"]})
         topic_meta = client.list_topics()
         
         if topic_meta.topics.get(self.topic_name) is None:
@@ -91,6 +91,7 @@ class Producer:
         # TODO: Write cleanup code for the Producer here
         #
         #
-        self.producer.flush()
+        if self.producer is not None:
+            self.producer.flush()
         
         # logger.info("producer close incomplete - skipping")
